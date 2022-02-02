@@ -22,31 +22,31 @@ const resolvers = {
   // create a user, sign a token, and send it back (to client/src/components/SignUpForm.js)
   Mutation: {
     async addUser(parent, args, { user }) {
-      const user = await User.create(args);
+      const newUser = await User.create(args);
 
-      if (!user) {
+      if (!newUser) {
         throw new AuthenticationError("Something is wrong!");
       }
-      const token = signToken(user);
-      return { token, user };
+      const token = signToken(newUser);
+      return { token, newUser };
     },
     // login a user, sign a token, and send it back (to client/src/components/LoginForm.js)
     // {args} is destructured req.args
     async login(parent, args, { user }) {
-      const user = await User.findOne({
+      const loginUser = await User.findOne({
         $or: [{ username: args.username }, { email: args.email }],
       });
-      if (!user) {
+      if (!loginUser) {
         throw new AuthenticationError("Can't find this user");
       }
 
-      const correctPw = await user.isCorrectPassword(args.password);
+      const correctPw = await loginUser.isCorrectPassword(args.password);
 
       if (!correctPw) {
         throw new AuthenticationError("Incorrect password");
       }
-      const token = signToken(user);
-      return { token, user };
+      const token = signToken(loginUser);
+      return { token, loginUser };
     },
     // save a book to a user's `savedBooks` field by adding it to the set (to prevent duplicates)
     // user comes from `req.user` created in the auth middleware function
